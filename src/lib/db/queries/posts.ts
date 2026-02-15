@@ -10,7 +10,9 @@ export async function createPost(title: string, url: string, description: string
         description,
         published_at,
         feed_id
-    }).returning();
+    })
+    .onConflictDoNothing()
+    .returning();
 
     return result;
 }
