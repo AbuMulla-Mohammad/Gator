@@ -1,5 +1,6 @@
 import { handlerAddFeed } from "./commands/handlers/addFeed_command_handler";
 import { handlerAgg } from "./commands/handlers/agg_command_handler";
+import { handlerBrowse } from "./commands/handlers/browse_command_handler";
 import { handlerFeeds } from "./commands/handlers/feeds_command_handler";
 import { handlerFollow } from "./commands/handlers/follow_command_handler";
 import { handlerFollowing } from "./commands/handlers/following_command_handler";
@@ -29,6 +30,7 @@ async function main() {
   registerCommand(registry, "follow", middlewareLoggedIn(handlerFollow));
   registerCommand(registry, "following", middlewareLoggedIn(handlerFollowing));
   registerCommand(registry, "unfollow", middlewareLoggedIn(handlerUnfollow));
+  registerCommand(registry, "browse", middlewareLoggedIn(handlerBrowse));
   
 
   const [cmdName, ...args] = argv;
