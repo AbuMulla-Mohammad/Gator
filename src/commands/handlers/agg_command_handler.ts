@@ -1,6 +1,7 @@
 import { getNextFeedToFetch, markFeedFetched } from "src/lib/db/queries/feeds";
 import { fetchFeed } from "src/rss/fetch_feed";
 import { toUUID } from "../helpers/ids";
+import { createPost } from "src/lib/db/queries/posts";
 
 export async function handlerAgg(cmdName: string, ...args: string[]) {
     if (args.length !== 1) {
@@ -37,14 +38,21 @@ async function scrapeFeeds() {
         return;
     }
 
+    const nextFeedToFetchUUID = toUUID(nextFeedToFetch.id);
 
-    await markFeedFetched(toUUID(nextFeedToFetch.id));
+    await markFeedFetched(nextFeedToFetchUUID);
 
     const response = await fetchFeed(nextFeedToFetch.url);
 
-    response.channel.item.forEach(i => {
-        console.log(`Title: ${i.title}`);
-    });
+    for (const item of response.channel.item) {
+        await insertPostSafe(
+            item.title,
+            item.link,
+            item.description,
+            parsePublishedAt(item.pubDate),
+            nextFeedToFetchUUID
+        );
+    }
 }
 
 function parseDuration(durationStr: string): number{
@@ -77,4 +85,20 @@ function formatDuration(ms: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}m${seconds}s`;
+}
+
+function parsePublishedAt(pubDate: string): Date {
+    const parsed = new Date(pubDate);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
+async function insertPostSafe(title: string, link: string, description: string, publishedAt: Date, feedId: string) {
+    try {
+        await createPost(title, link, description, publishedAt, toUUID(feedId));
+    } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (!message.includes("duplicate key")) {
+            throw err;
+        }
+    }
 }
