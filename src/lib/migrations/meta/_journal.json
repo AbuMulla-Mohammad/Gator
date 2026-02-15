@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1770989155522,
+      "tag": "0000_lethal_invaders",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771082926373,
+      "tag": "0001_abnormal_stick",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771092285799,
+      "tag": "0002_tranquil_starhawk",
+      "breakpoints": true
+    }
+  ]
+}
