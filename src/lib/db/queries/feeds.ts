@@ -1,7 +1,7 @@
 import { UUID } from "node:crypto";
 import { db } from "..";
 import { feed_follows, feeds, users } from "../schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 export async function createFeed(name:string,url:string,user_id:UUID) {
     const [result] = await db.insert(feeds).values({
@@ -23,3 +23,18 @@ export async function getFeedByURL(url: string) {
     return result;
 }
 
+
+export async function markFeedFetched(feed_id:UUID) {
+    const [result] = await db.update(feeds)
+        .set({ updated_at: new Date(), last_fetched_at: new Date() })
+        .where(eq(feeds.id, feed_id))
+        .returning();
+    return result;
+}
+
+export async function getNextFeedToFetch() {
+    const [result] = await db.select().from(feeds)
+        .orderBy(sql`${feeds.last_fetched_at} ASC NULLS FIRST`)
+        .limit(1);
+    return result;
+}
